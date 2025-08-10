@@ -1,0 +1,183 @@
+# UK Solicitors Data Processing Configuration
+
+# API Rate Limits
+api_rate_limits:
+  sra_api:
+    requests_per_minute: 60
+    requests_per_hour: 1000
+  google_places:
+    requests_per_minute: 30
+    requests_per_day: 1000
+  trustpilot:
+    requests_per_minute: 20
+    requests_per_hour: 500
+  general_scraping:
+    requests_per_minute: 10
+    delay_between_requests: 1.0
+
+# File Paths
+file_paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  output_data: "data/output"
+  logs: "logs"
+  reports: "reports"
+  temp: "data/temp"
+
+# Processing Parameters
+processing:
+  batch_size: 100
+  max_retries: 3
+  retry_delay: 2.0
+  timeout_seconds: 30
+  fuzzy_match_threshold: 85
+  max_workers: 4
+  chunk_size: 1000
+
+# Logging Configuration
+logging:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    standard:
+      format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    detailed:
+      format: "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(funcName)s() - %(message)s"
+    json:
+      format: "%(asctime)s"
+      class: "pythonjsonlogger.jsonlogger.JsonFormatter"
+  handlers:
+    console:
+      class: "logging.StreamHandler"
+      level: "INFO"
+      formatter: "standard"
+      stream: "ext://sys.stdout"
+    file:
+      class: "logging.handlers.RotatingFileHandler"
+      level: "DEBUG"
+      formatter: "detailed"
+      filename: "logs/app.log"
+      maxBytes: 10485760  # 10MB
+      backupCount: 5
+    error_file:
+      class: "logging.handlers.RotatingFileHandler"
+      level: "ERROR"
+      formatter: "detailed"
+      filename: "logs/error.log"
+      maxBytes: 10485760  # 10MB
+      backupCount: 5
+  loggers:
+    "":
+      level: "INFO"
+      handlers: ["console", "file"]
+      propagate: false
+    "collectors":
+      level: "DEBUG"
+      handlers: ["console", "file"]
+      propagate: false
+    "processors":
+      level: "DEBUG"
+      handlers: ["console", "file"]
+      propagate: false
+    "utils":
+      level: "INFO"
+      handlers: ["console", "file"]
+      propagate: false
+  root:
+    level: "INFO"
+    handlers: ["console", "file"]
+
+# Data Validation Rules
+validation:
+  sra_record:
+    required_fields:
+      - "solicitor_number"
+      - "first_name"
+      - "last_name"
+      - "organisation"
+      - "status"
+    field_types:
+      solicitor_number: "string"
+      first_name: "string"
+      last_name: "string"
+      organisation: "string"
+      status: "string"
+      
+  google_places_record:
+    required_fields:
+      - "place_id"
+      - "name"
+      - "address"
+    field_types:
+      place_id: "string"
+      name: "string"
+      address: "string"
+      rating: "number"
+      review_count: "integer"
+
+  review_record:
+    required_fields:
+      - "reviewer_name"
+      - "rating"
+      - "review_text"
+      - "date"
+    field_types:
+      reviewer_name: "string"
+      rating: "number"
+      review_text: "string"
+      date: "string"
+      platform: "string"
+
+# Data Sources Configuration
+data_sources:
+  sra_api:
+    base_url: "https://www.sra.org.uk/consumers/solicitor-check/"
+    endpoints:
+      search: "search"
+      details: "details"
+    
+  google_places:
+    base_url: "https://maps.googleapis.com/maps/api/place"
+    endpoints:
+      search: "nearbysearch/json"
+      details: "details/json"
+      
+  review_platforms:
+    trustpilot:
+      base_url: "https://www.trustpilot.com"
+      search_path: "/review"
+    yelp:
+      base_url: "https://www.yelp.co.uk"
+      search_path: "/biz"
+    reviewsolicitors:
+      base_url: "https://www.reviewsolicitors.co.uk"
+      search_path: "/solicitor"
+
+# Geographic Settings
+geographic:
+  uk_regions:
+    - "London"
+    - "Manchester"
+    - "Birmingham"
+    - "Leeds"
+    - "Liverpool"
+    - "Sheffield"
+    - "Bristol"
+    - "Newcastle"
+    - "Nottingham"
+    - "Leicester"
+  coordinate_bounds:
+    uk_north: 60.8
+    uk_south: 49.9
+    uk_west: -8.2
+    uk_east: 1.8
+
+# Output Settings
+output:
+  formats:
+    - "json"
+    - "csv"
+    - "parquet"
+  compression: "gzip"
+  include_metadata: true
+  date_format: "%Y-%m-%d %H:%M:%S"

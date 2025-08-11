@@ -150,6 +150,34 @@ class DataValidator:
                 if not self.validate_solicitor_number(record['solicitor_number']):
                     errors.append("Invalid solicitor number format")
         
+        elif record_type == "sra_organization":
+            if 'SraNumber' in record:
+                if not self.validate_solicitor_number(str(record['SraNumber'])):
+                    errors.append("Invalid SRA organization number format")
+            
+            # Validate offices array exists and is valid
+            if 'Offices' in record:
+                if not isinstance(record['Offices'], list):
+                    errors.append("Offices field must be a list")
+                elif len(record['Offices']) == 0:
+                    warnings.append("Organization has no offices")
+        
+        elif record_type == "sra_office":
+            # Validate postcode if present
+            if record.get('Postcode'):
+                if not self.validate_postcode_uk(record['Postcode']):
+                    warnings.append("Invalid postcode format")
+            
+            # Validate email if present
+            if record.get('Email'):
+                if not self.validate_email(record['Email']):
+                    warnings.append("Invalid email format")
+            
+            # Validate phone if present
+            if record.get('PhoneNumber'):
+                if not self.validate_phone_uk(record['PhoneNumber']):
+                    warnings.append("Invalid phone number format")
+        
         elif record_type == "review_record":
             if 'rating' in record:
                 if not self.validate_rating(record['rating']):

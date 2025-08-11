@@ -89,19 +89,45 @@ logging:
 
 # Data Validation Rules
 validation:
-  sra_record:
+  sra_organization:
     required_fields:
-      - "solicitor_number"
-      - "first_name"
-      - "last_name"
-      - "organisation"
-      - "status"
+      - "Id"
+      - "SraNumber"
+      - "PracticeName"
+      - "Offices"
     field_types:
-      solicitor_number: "string"
-      first_name: "string"
-      last_name: "string"
-      organisation: "string"
-      status: "string"
+      Id: "integer"
+      SraNumber: "integer"
+      PracticeName: "string"
+      AuthorisationType: "string"
+      OrganisationType: "string"
+      Regulator: "string"
+      Constitution: "string"
+      Type: "string"
+      NoOfOffices: "integer"
+      
+  sra_office:
+    required_fields:
+      - "OfficeId"
+      - "Name"
+      - "Address1"
+      - "Town"
+      - "Country"
+    field_types:
+      OfficeId: "integer"
+      Name: "string"
+      Address1: "string"
+      Address2: "string"
+      Address3: "string" 
+      Address4: "string"
+      Postcode: "string"
+      Town: "string"
+      County: "string"
+      Country: "string"
+      PhoneNumber: "string"
+      Website: "string"
+      Email: "string"
+      OfficeType: "string"
       
   google_places_record:
     required_fields:
@@ -131,10 +157,17 @@ validation:
 # Data Sources Configuration
 data_sources:
   sra_api:
-    base_url: "https://www.sra.org.uk/consumers/solicitor-check/"
+    base_url: "https://sra-prod-apim.azure-api.net"
+    api_key: "b9d38adee375434082b64caeb091ea8c"
     endpoints:
-      search: "search"
-      details: "details"
+      organizations: "/datashare/api/V1/organisation/GetAll"
+    rate_limit:
+      requests_per_period: 600
+      period_minutes: 5
+      delay_between_requests: 0.5
+    timeout: 30
+    max_retries: 3
+    retry_delay: 2.0
     
   google_places:
     base_url: "https://maps.googleapis.com/maps/api/place"
